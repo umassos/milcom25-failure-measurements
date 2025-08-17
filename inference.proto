@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service InferenceService {
+    rpc Predict (InferenceRequest) returns (InferenceResponse);
+}
+
+message InferenceRequest {
+    bytes input = 2; // input numpy array compressed by zlib
+    repeated int32 shape = 3;  // shape of the input tensor
+}
+
+
+message InferenceResponse {
+    bytes output = 1;          // output numpy array compressed by zlib
+    repeated int32 shape = 2;  // shape of the output tensor
+}
