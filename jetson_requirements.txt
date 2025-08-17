@@ -1,0 +1,26 @@
+# Jetson Orin Profiling Dependencies
+# Install with: pip install -r jetson_requirements.txt
+
+# Core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.21.0
+psutil>=5.8.0
+
+# ONNX support
+onnx>=1.12.0
+onnxruntime>=1.12.0
+
+# TensorRT support (Jetson specific)
+# Note: TensorRT is usually pre-installed on Jetson devices
+# If not available, install with: sudo apt-get install python3-tensorrt
+
+# PyCUDA for GPU memory management
+# Note: PyCUDA is usually pre-installed on Jetson devices
+# If not available, install with: sudo apt-get install python3-pycuda
+
+# Optional: FLOPs calculation
+thop>=0.1.0
+
+# Optional: Better system monitoring
+GPUtil>=1.4.0
