@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  s1-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.jetson
+      tags: ["jetson-profiling:latest"]
+    container_name: jetson-profiling
+    ports:
+      - "8180:8180"
+    volumes:
+      # Mount your Python source code for development (comment out for production)
+      - ./:/app/
+      # # Mount your ONNX models directory
+      # - ./models:/app/models:ro
+      # # Mount logs directory (optional)
+      # - ./logs:/app/logs
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTHONUNBUFFERED=1
+    restart: no
+    # GPU runtime requirements
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # Override default command if needed
+    entrypoint: ["./run_gpu_profiling.sh"]
