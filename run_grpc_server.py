@@ -12,6 +12,7 @@ import numpy as np
 def parse_args():
     parser = argparse.ArgumentParser(description='GRPC Server')
     parser.add_argument('-m', '--model_id', type=str, required=True, help='Model ID')
+    parser.add_argument('-p', '--port', type=int, default=8180, help='Port to run the server on')
     return parser.parse_args()
 
 class InferenceServiceServicer(InferenceServiceServicer):
@@ -26,12 +27,12 @@ class InferenceServiceServicer(InferenceServiceServicer):
         outputs = zlib.compress(outputs.tobytes())
         return InferenceResponse(output=outputs, shape=request.shape)
 
-def run_grpc_server(session):
+def run_grpc_server(session, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     add_InferenceServiceServicer_to_server(InferenceServiceServicer(session), server)
-    server.add_insecure_port('[::]:8180')
+    server.add_insecure_port('[::]:{}'.format(port))
     server.start()
-    print("Inference grpc server started on port 8180")
+    print("Inference grpc server started on port {}".format(port))
     server.wait_for_termination()
 
 
@@ -43,7 +44,7 @@ def main():
     print("Model {} loaded in {:.2f} ms".format(args.model_id, load_duration_ms))
     
     # Start the server
-    run_grpc_server(session)
+    run_grpc_server(session, args.port)
 
 if __name__ == "__main__":
     main()
