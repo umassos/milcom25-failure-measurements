@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  jetson-inference-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+      tags: ["jetson-inference-server:latest"]
+    container_name: jetson-inference-server
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./onnx_models:/app/onnx_models:ro
+      - ./:/app/
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTHONUNBUFFERED=1
+    restart: no
+    # Jetson-specific runtime requirements
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # Override default command if needed
+    entrypoint: ["python3", "run_grpc_server_torch.py"]
+    command: ["-m", "resnet50"] 

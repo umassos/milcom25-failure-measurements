@@ -11,8 +11,11 @@ import torch
 import torchvision
 import time
 import timeit
-from run_gpu_profiling import init_nvml, model_config, device, dtype
+from model_config import model_config
 
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+dtype = torch.float16 if device == "cuda" else torch.float32
+print(device)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='GRPC Server')
@@ -56,7 +59,6 @@ def run_grpc_server(model, port):
 
 def main():
     args = parse_args()
-    handle, device_name = init_nvml()
     model_family, model_variant, weights, input_shape = model_config[args.model_id]
     
     # Load PyTorch model
