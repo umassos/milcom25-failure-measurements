@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument('-o', '--output_file', type=str, default='response_latencies_jetson.csv', help='File name to save the response latencies')
     return parser.parse_args()
 
-def run_inference(stub, input_shape, num_iterations):
+def run_inference(stub, input_shape, num_iterations, model_id, file_name):
     input_data = np.random.randn(*input_shape).astype(np.float32)
     input_bytes = zlib.compress(input_data.tobytes())
     request = InferenceRequest(input=input_bytes, shape=input_shape)
@@ -50,18 +50,18 @@ def run_inference(stub, input_shape, num_iterations):
     avg_response_time_ms = (sum(response_latencies) / len(response_latencies)) * 1000
     print("Average response time: {:.2f} ms".format(avg_response_time_ms))
 
-    df = pd.read_csv("profiles.csv", index_col=0)
+    df = pd.read_csv(file_name, index_col=0)
     if 'first_response_time_ms' not in df.columns:
         df['first_response_time_ms'] = 0.0
     if 'avg_response_time_ms' not in df.columns:
         df['avg_response_time_ms'] = 0.0
     
 
-    df.loc[args.model_id, 'first_response_time_ms'] = first_response_time_ms
-    df.loc[args.model_id, 'avg_response_time_ms'] = avg_response_time_ms
+    df.loc[model_id, 'first_response_time_ms'] = first_response_time_ms
+    df.loc[model_id, 'avg_response_time_ms'] = avg_response_time_ms
 
-    df.to_csv("profiles.csv", index=True)
-    print("Updated row in output csv: {}".format(df.loc[args.model_id]))
+    df.to_csv(file_name, index=True)
+    print("Updated row in output csv: {}".format(df.loc[model_id]))
 
 
 

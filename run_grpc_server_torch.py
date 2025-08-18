@@ -35,15 +35,18 @@ class InferenceServiceServicer(InferenceServiceServicer):
         # Convert to PyTorch tensor and move to GPU
         input_tensor = torch.tensor(input_data, dtype=torch.float32).to(device)
         
+        service_time = 0.0
         # Run inference with PyTorch
         with torch.no_grad():  # Disable gradient computation for inference
+            start_time = timeit.default_timer()
             outputs = self.model(input_tensor)
+            service_time = timeit.default_timer() - start_time
         
         # Convert back to numpy and compress
         outputs_np = outputs.cpu().numpy()
         outputs_compressed = zlib.compress(outputs_np.tobytes())
         
-        return InferenceResponse(output=outputs_compressed, shape=list(outputs_np.shape))
+        return InferenceResponse(output=outputs_compressed, shape=list(outputs_np.shape), service_time=service_time)
 
 def load_model(model_variant, weights):
     model = getattr(torchvision.models, model_variant)(weights=weights).to(device).to(dtype).eval()

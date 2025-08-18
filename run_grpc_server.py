@@ -8,6 +8,7 @@ from run_gpu_profiling import load_model, init_nvml, model_config
 import argparse
 import zlib
 import numpy as np
+import timeit
 
 def parse_args():
     parser = argparse.ArgumentParser(description='GRPC Server')
@@ -23,9 +24,11 @@ class InferenceServiceServicer(InferenceServiceServicer):
         input_data = request.input
         input_data = zlib.decompress(input_data)
         input_data = np.frombuffer(input_data, dtype=np.float32).reshape(request.shape)
+        start_time = timeit.default_timer()
         outputs = self.session.run(output_names=["output"], input_feed={"input": input_data})[0]
+        service_time = timeit.default_timer() - start_time
         outputs = zlib.compress(outputs.tobytes())
-        return InferenceResponse(output=outputs, shape=request.shape)
+        return InferenceResponse(output=outputs, shape=request.shape, service_time=service_time)
 
 def run_grpc_server(session, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
