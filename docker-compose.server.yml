@@ -27,4 +27,4 @@ services:
               capabilities: [gpu]
     # Override default command if needed
     entrypoint: ["python3", "run_grpc_server_torch.py"]
-    command: ["-m", "resnet50"] 
+    command: ["-m", "efficientnet_b0"] 

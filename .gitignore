@@ -2,3 +2,4 @@
 onnx_models/
 *.log
 __pycache__/
+*models/
