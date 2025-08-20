@@ -49,7 +49,7 @@ class InferenceServiceServicer(InferenceServiceServicer):
         return InferenceResponse(output=outputs_compressed, shape=list(outputs_np.shape), service_time=service_time)
 
 def load_model(model_variant, weights):
-    model = getattr(torchvision.models, model_variant)(weights=weights).to(device).to(dtype).eval()
+    model = getattr(torchvision.models, model_variant)(weights=None).to(device).to(dtype).eval()
     return model
 
 def run_grpc_server(model, port):
