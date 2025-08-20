@@ -11,7 +11,7 @@ import zlib
 def parse_args():
     parser = argparse.ArgumentParser(description='GRPC Client')
     parser.add_argument('-m', '--model_id', type=str, required=True, help='Model ID')
-    parser.add_argument('-n', '--num_iterations', type=int, default=500, help='Number of inference iterations')
+    parser.add_argument('-n', '--num_iterations', type=int, default=1000, help='Number of inference iterations')
     parser.add_argument('-s', '--model_server', type=str, default='obelix193:8180', help='Server address of the model')
     parser.add_argument('-o', '--output_file', type=str, default='response_latencies_jetson.csv', help='File name to save the response latencies')
     return parser.parse_args()
@@ -73,15 +73,14 @@ def get_response_times(stub, input_shape, num_iterations, model_id, file_name):
 
     # Warmup
     print("Running warmup iterations...")
-    for i in range(10):
+    for i in range(100):
         response = stub.Predict(request)
     
     # Run inference iterations
     print("Running {} inference iterations...".format(num_iterations))
     response_latencies = []
+    service_times = []
     
-    # i = 0
-    # while True:
     for i in range(num_iterations):
         input_data = np.random.randn(*input_shape).astype(np.float32)
         input_bytes = zlib.compress(input_data.tobytes())
@@ -89,15 +88,17 @@ def get_response_times(stub, input_shape, num_iterations, model_id, file_name):
 
         start_time = timeit.default_timer()
         response = stub.Predict(request)
-        end_time = timeit.default_timer()
-        response_latencies.append(end_time - start_time)
+        response_time = timeit.default_timer() - start_time
+        response_latencies.append(response_time)
+        service_times.append(response.service_time)
         if (i + 1) % 100 == 0:
             print("Completed {} iterations".format(i + 1))
-        # i += 1
+            print("Response time: {}, Service time: {} ".format(response_time, response.service_time))
+
 
     # write response_latencies to a csv file
     df = pd.read_csv(file_name, index_col=0)
-    df.loc[model_id] = [response_latencies]
+    df.loc[model_id] = [response_latencies, service_times]
     df.to_csv(file_name, index=True)
     return
 
