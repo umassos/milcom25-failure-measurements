@@ -1,6 +1,8 @@
 efficientnet_b0
 efficientnet_b1
 efficientnet_b2
+resnet50
+resnet101
 efficientnet_b3
 efficientnet_b4
 efficientnet_b5
@@ -15,8 +17,6 @@ shufflenet_v2_x1_5
 shufflenet_v2_x2_0
 resnet18
 resnet34
-resnet50
-resnet101
 resnet152
 wide_resnet50_2
 wide_resnet101_2
