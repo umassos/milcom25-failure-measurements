@@ -24,7 +24,6 @@ while IFS= read -r model_id; do
     echo "Profiling model: $model_id"
     echo "=========================================="
     
-    # convert_to_trt.py -m "$model_id"
     /usr/src/tensorrt/bin/trtexec --onnx="onnx_models/$model_id.onnx" --saveEngine="trt_models/$model_id.trt" --skipInference
     echo ""
     

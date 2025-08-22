@@ -19,7 +19,7 @@ import argparse
 import timeit
 import pandas as pd
 import tensorrt as trt
-
+import gc
 
 def load_trt_model(engine_path) -> tuple[trt.ICudaEngine, trt.IExecutionContext, float]:
     logger = trt.Logger(trt.Logger.ERROR)
@@ -32,7 +32,6 @@ def load_trt_model(engine_path) -> tuple[trt.ICudaEngine, trt.IExecutionContext,
     return engine, context, load_time
 
 def main(args):
-    # model_family, model_variant, weights, input_shape = model_config[args.model_id]
     engine_path = f"trt_models/{args.model_id}.trt"
     if not os.path.exists(engine_path):
         print(f"TRT Engine file {engine_path} does not exist")
@@ -42,14 +41,18 @@ def main(args):
     print(context)
     print(f"Model {args.model_id} loaded in {load_time * 1000:.2f} ms")
 
-    # df = pd.read_csv(args.output_file, index_col=0)
-    # if 'trt_load_time_ms' not in df.columns:
-    #     df['trt_load_time_ms'] = 0.0
-    
-    # df.loc[args.model_id, 'trt_load_time_ms'] = load_time * 1000
-    # df.to_csv(args.output_file, index=True)
-    # print(f"Updated row in output csv: {df.loc[args.model_id]}")
 
+    df = pd.read_csv(args.output_file, index_col=0)
+    if 'orin_nano_trt_load_time_ms' not in df.columns:
+        df['orin_nano_trt_load_time_ms'] = 0.0
+    
+    df.loc[args.model_id, 'orin_nano_trt_load_time_ms'] = load_time * 1000
+    df.to_csv(args.output_file, index=True)
+    print(f"Updated row in output csv: {df.loc[args.model_id]}")
+
+    del engine
+    del context
+    gc.collect()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Model Profiling on GPU')
